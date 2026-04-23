@@ -10,36 +10,44 @@ cloudinary.config({
 const uploadCloudinary = async (localFilePath) => {
   try {
     if (!localFilePath) return null;
-    // upload the file on cloudinary
+
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
     });
-    // file has been uploaded successfully
-    // console.log("file is uploaded on cloudinary", response.url);
-    fs.unlinkSync(localFilePath)
+
+    // ✅ safe delete
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
+
     return response;
-    // console.log(response);
   } catch (error) {
-    fs.unlinkSync(localFilePath); // remove the locally saved temporary file as the upload operation got failed
+    console.error("Cloudinary upload failed:", error);
+
+    // ✅ safe delete in catch
+    if (localFilePath && fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
+
     return null;
   }
 };
 
-const deleteFromCloudinary = async (publicUrl) => {
+const deleteFromCloudinary = async (fileUrl) => {
   try {
-    if (!publicUrl) return null;
+    if (!fileUrl) return null;
 
-    // Extract public_id from URL, handling optional folder paths
-    // e.g. "https://res.cloudinary.com/<cloud>/image/upload/v123/folder/filename.jpg"
-    //       → public_id = "folder/filename"
-    const urlParts = publicUrl.split("/");
-    const uploadIndex = urlParts.indexOf("upload");
-    const publicId = urlParts
-      .slice(uploadIndex + 2)   // skip "upload" and the version segment (v123456)
-      .join("/")
-      .split(".")[0];            // strip file extension
+    // ✅ safer public_id extraction
+    const parts = fileUrl.split("/upload/");
+    if (parts.length < 2) return null;
 
-    const result = await cloudinary.uploader.destroy(publicId);
+    const path = parts[1].replace(/^v\d+\//, ""); // remove version
+    const publicId = path.replace(/\.[^/.]+$/, ""); // remove extension
+
+    const result = await cloudinary.uploader.destroy(publicId, {
+      resource_type: "auto", // ✅ handles image/video/raw
+    });
+
     return result;
   } catch (error) {
     console.error("Error deleting from Cloudinary:", error);
@@ -47,4 +55,4 @@ const deleteFromCloudinary = async (publicUrl) => {
   }
 };
 
-export {uploadCloudinary, deleteFromCloudinary}
+export { uploadCloudinary, deleteFromCloudinary };
