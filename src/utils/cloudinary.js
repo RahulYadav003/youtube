@@ -15,7 +15,7 @@ const uploadCloudinary = async (localFilePath) => {
       resource_type: "auto",
     });
 
-    // ✅ safe delete
+    // safe delete
     if (fs.existsSync(localFilePath)) {
       fs.unlinkSync(localFilePath);
     }
@@ -24,7 +24,7 @@ const uploadCloudinary = async (localFilePath) => {
   } catch (error) {
     console.error("Cloudinary upload failed:", error);
 
-    // ✅ safe delete in catch
+    // safe delete in catch
     if (localFilePath && fs.existsSync(localFilePath)) {
       fs.unlinkSync(localFilePath);
     }
@@ -37,7 +37,7 @@ const deleteFromCloudinary = async (fileUrl) => {
   try {
     if (!fileUrl) return null;
 
-    // ✅ safer public_id extraction
+    //  safer public_id extraction
     const parts = fileUrl.split("/upload/");
     if (parts.length < 2) return null;
 
@@ -45,7 +45,7 @@ const deleteFromCloudinary = async (fileUrl) => {
     const publicId = path.replace(/\.[^/.]+$/, ""); // remove extension
 
     const result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: "auto", // ✅ handles image/video/raw
+      resource_type: "auto", // handles image/video/raw
     });
 
     return result;
