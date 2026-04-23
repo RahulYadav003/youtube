@@ -25,4 +25,26 @@ const uploadCloudinary = async (localFilePath) => {
   }
 };
 
-export {uploadCloudinary}
+const deleteFromCloudinary = async (publicUrl) => {
+  try {
+    if (!publicUrl) return null;
+
+    // Extract public_id from URL, handling optional folder paths
+    // e.g. "https://res.cloudinary.com/<cloud>/image/upload/v123/folder/filename.jpg"
+    //       → public_id = "folder/filename"
+    const urlParts = publicUrl.split("/");
+    const uploadIndex = urlParts.indexOf("upload");
+    const publicId = urlParts
+      .slice(uploadIndex + 2)   // skip "upload" and the version segment (v123456)
+      .join("/")
+      .split(".")[0];            // strip file extension
+
+    const result = await cloudinary.uploader.destroy(publicId);
+    return result;
+  } catch (error) {
+    console.error("Error deleting from Cloudinary:", error);
+    return null;
+  }
+};
+
+export {uploadCloudinary, deleteFromCloudinary}
