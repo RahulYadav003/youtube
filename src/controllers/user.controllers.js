@@ -4,6 +4,7 @@ import { User } from "../models/user.js";
 import { uploadCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 
 
 const generateAccessAndRefereshTokens = async(userId) => {
@@ -60,7 +61,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
   // console.log(req.files);
 
-  const avatarLocalPath = req.files?.avatar[0]?.path;
+  const avatarLocalPath = req.files?.avatar?.[0]?.path;
   // const coverImageLocalPath = req.files?.coverImage[0]?.path;
   // for empty cover imgae
   let coverImageLocalPath;
@@ -152,8 +153,8 @@ const logoutUser = asyncHandler(async(req, res) => {
     User.findByIdAndUpdate(
        req.user._id,
        {
-       $set: {
-        refreshToken: undefined
+       $unset: {
+        refreshToken: 1
        }
        },
       {
