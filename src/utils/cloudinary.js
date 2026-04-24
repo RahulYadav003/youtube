@@ -13,9 +13,11 @@ const uploadCloudinary = async (localFilePath) => {
 
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
+      folder: "app",
+      quality: "auto",
+      fetch_format: "auto",
     });
 
-    // safe delete
     if (fs.existsSync(localFilePath)) {
       fs.unlinkSync(localFilePath);
     }
@@ -24,7 +26,6 @@ const uploadCloudinary = async (localFilePath) => {
   } catch (error) {
     console.error("Cloudinary upload failed:", error);
 
-    // safe delete in catch
     if (localFilePath && fs.existsSync(localFilePath)) {
       fs.unlinkSync(localFilePath);
     }
@@ -37,15 +38,14 @@ const deleteFromCloudinary = async (fileUrl) => {
   try {
     if (!fileUrl) return null;
 
-    //  safer public_id extraction
     const parts = fileUrl.split("/upload/");
     if (parts.length < 2) return null;
 
-    const path = parts[1].replace(/^v\d+\//, ""); // remove version
-    const publicId = path.replace(/\.[^/.]+$/, ""); // remove extension
+    const path = parts[1].replace(/^v\d+\//, "");
+    const publicId = path.replace(/\.[^/.]+$/, "");
 
     const result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: "auto", // handles image/video/raw
+      resource_type: "auto",
     });
 
     return result;

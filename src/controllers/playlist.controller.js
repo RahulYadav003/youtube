@@ -625,5 +625,8 @@ export {
   deletePlaylist,
   restorePlaylist,
   getDeletedPlaylists,
-  permanentlyDeletePlaylist
+  permanentlyDeletePlaylist,
+  addVideoToPlaylist,
+  removeVideoFromPlaylist,
+  reorderPlaylistVideos,
 };
